@@ -8,6 +8,7 @@ using Todo.Data;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using System;
 
 namespace Todo
 {
@@ -48,7 +49,7 @@ namespace Todo
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IServiceProvider serviceProvider)
         {
             app.UseRouting();
 
@@ -74,6 +75,16 @@ namespace Todo
                 endpoints.MapDefaultControllerRoute();
                 endpoints.MapRazorPages();
             });
+            ApplyMigrations(serviceProvider);
+        }
+
+        private static void ApplyMigrations(IServiceProvider serviceProvider)
+        {
+            using (var scope = serviceProvider.CreateScope())
+            {
+                var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                dbContext.Database.Migrate();
+            }
         }
     }
 }
