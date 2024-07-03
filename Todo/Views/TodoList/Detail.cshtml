@@ -43,6 +43,10 @@
             </a>
             <span> | </span>
             <a id="toggleDoneItems">Hide Done Items</a>
+            <span> | </span>
+            <a asp-action="Detail" asp-controller="TodoList" asp-route-todoListId="@Model.TodoListId" asp-route-orderByRank=true>
+                Order by Rank (from low to high)
+            </a>
         </li>
 
         @foreach (var item in Model.Items.OrderBy(i => i.Importance))

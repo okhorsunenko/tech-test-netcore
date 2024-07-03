@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -31,9 +32,13 @@ namespace Todo.Controllers
             return View(viewmodel);
         }
 
-        public IActionResult Detail(int todoListId)
+        public IActionResult Detail(int todoListId, bool orderByRank = false)
         {
             var todoList = dbContext.SingleTodoList(todoListId);
+
+            if (todoList != null && orderByRank)
+                todoList.Items = todoList.Items.OrderBy(ti => ti.Rank).ToList();
+
             var viewmodel = TodoListDetailViewmodelFactory.Create(todoList);
             return View(viewmodel);
         }
