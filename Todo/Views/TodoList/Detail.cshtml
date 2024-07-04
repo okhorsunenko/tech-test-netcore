@@ -28,6 +28,10 @@
             <a asp-action="Detail" asp-controller="TodoList" asp-route-todoListId="@Model.TodoListId" asp-route-orderByRank=true>
                 Order by Rank (from low to high)
             </a>
+            <span> | </span>
+            <a id="sortAsc">Sort Asc</a>
+            <span> | </span>
+            <a id="sortDesc">Sort Desc</a>
         </li>
 
         @foreach (var item in Model.Items.OrderBy(i => i.Importance))
@@ -46,11 +50,11 @@
                     break;
             }
 
-            <li class="list-group-item @contextualClass" data-item-is-done="@item.IsDone">
+            <li class="list-group-item @contextualClass" data-item-is-done="@item.IsDone" data-rank="@item.Rank">
                 
                 <div class="row">
 
-                <div class="col-md-8">
+                <div class="col-md-4">
                     <a asp-action="Edit" asp-controller="TodoItem" asp-route-todoItemId="@item.TodoItemId">
 
                         @if (item.IsDone)
@@ -62,6 +66,10 @@
                             <text>@item.Title</text>
                         }
                     </a>
+                </div>
+                <div class="col-md-4">
+                    <input type="number" class="rank-input" data-item-id="@item.TodoItemId" value="@item.Rank" style="width: 60px;" />
+                    <button type="button" class="btn btn-sm btn-info update-rank-btn" data-item-id="@item.TodoItemId">Update</button>
                 </div>
 
                 <div class="col-md-4 text-right">

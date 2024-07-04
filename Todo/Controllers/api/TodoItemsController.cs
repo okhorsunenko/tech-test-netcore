@@ -2,7 +2,6 @@
 using System.Threading.Tasks;
 using Todo.Data.Entities;
 using Todo.Data;
-using Todo.EntityModelMappers.TodoItems;
 using Todo.Services;
 using Todo.Models.TodoItems;
 
@@ -12,11 +11,11 @@ namespace Todo.Controllers.api
     [ApiController]
     public class TodoItemsController : ControllerBase
     {
-        private readonly ApplicationDbContext context;
+        private readonly ApplicationDbContext dbContext;
 
-        public TodoItemsController(ApplicationDbContext context)
+        public TodoItemsController(ApplicationDbContext dbContext)
         {
-            this.context = context;
+            this.dbContext = dbContext;
         }
 
         [HttpPost]
@@ -26,10 +25,25 @@ namespace Todo.Controllers.api
 
             var todoItem = new TodoItem(fields.TodoListId, fields.ResponsiblePartyId, fields.Title, fields.Importance);
 
-            await context.AddAsync(todoItem);
-            await context.SaveChangesAsync();
+            await dbContext.AddAsync(todoItem);
+            await dbContext.SaveChangesAsync();
 
             return CreatedAtAction("GetTodoItem", new { id = todoItem.TodoItemId }, todoItem);
+        }
+
+        [HttpPost("{id}/rank")]
+        public async Task<IActionResult> UpdateRank(int id, [FromBody] int newRank)
+        {
+            var todoItem = dbContext.SingleTodoItem(id);
+            if (todoItem == null)
+            {
+                return NotFound();
+            }
+
+            todoItem.Rank = newRank;
+            await dbContext.SaveChangesAsync();
+
+            return Ok();
         }
     }
 }
