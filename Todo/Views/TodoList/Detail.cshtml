@@ -1,12 +1,16 @@
 ﻿@using System.Linq
 @using Todo.Controllers
+@using Todo.Data
 @using Todo.Data.Entities
 @using Todo.Services
+@using Todo.Views.TodoItem
 @model Todo.Models.TodoLists.TodoListDetailViewmodel
 
 @{
     ViewData["Title"] = $"List: {Model.Title}";
 }
+
+@inject ApplicationDbContext dbContext
 
 @section Scripts {
     <script src="~/js/detailPageTodoList.js"></script>
@@ -19,10 +23,6 @@
     <ul class="list-group">
 
         <li class="list-group-item">
-            <a asp-action="Create" asp-controller="TodoItem" asp-route-todoListId="@Model.TodoListId">
-                <strong>Add New Item</strong>
-            </a>
-            <span> | </span>
             <a id="toggleDoneItems">Hide Done Items</a>
             <span> | </span>
             <a asp-action="Detail" asp-controller="TodoList" asp-route-todoListId="@Model.TodoListId" asp-route-orderByRank=true>
@@ -79,4 +79,38 @@
             </li>
         }
     </ul>
+</div>
+
+<div class="col-md-6">
+    <h3>Add New Item</h3>
+    <form id="addItemForm">
+        <input type="hidden" name="TodoListId" value="@Model.TodoListId" />
+
+        <div class="form-group">
+            <label for="Title">Title</label>
+            <input type="text" class="form-control" id="Title" name="Title" required />
+        </div>
+
+        <div class="form-group">
+            <label for="Importance">Importance</label>
+            <select class="form-control" id="Importance" name="Importance">
+                @foreach (Importance value in Enum.GetValues(typeof(Importance)))
+                {
+                    <option value=@((int)value)>@value</option>
+                }
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="ResponsiblePartyId">Responsible Party</label>
+            <select class="form-control" id="ResponsiblePartyId" name="ResponsiblePartyId">
+                @foreach (var user in dbContext.UserSelectListItems())
+                {
+                    <option value="@user.Value">@user.Text</option>
+                }
+            </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Add Item</button>
+    </form>
 </div>
