@@ -7,6 +7,9 @@ namespace Todo.Services
     {
         public static string GetHash(string emailAddress)
         {
+            if(string.IsNullOrWhiteSpace(emailAddress) || string.IsNullOrEmpty(emailAddress))
+                return string.Empty;
+            
             using (var md5 = MD5.Create())
             {
                 var inputBytes = Encoding.Default.GetBytes(emailAddress.Trim().ToLowerInvariant());

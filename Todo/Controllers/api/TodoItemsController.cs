@@ -4,6 +4,7 @@ using Todo.Data.Entities;
 using Todo.Data;
 using Todo.Services;
 using Todo.Models.TodoItems;
+using System;
 
 namespace Todo.Controllers.api
 {
@@ -23,27 +24,42 @@ namespace Todo.Controllers.api
         {
             if (!ModelState.IsValid) { return BadRequest(ModelState); }
 
-            var todoItem = new TodoItem(fields.TodoListId, fields.ResponsiblePartyId, fields.Title, fields.Importance);
+            try
+            {
+                var todoItem = new TodoItem(fields.TodoListId, fields.ResponsiblePartyId, fields.Title, fields.Importance);
 
-            await dbContext.AddAsync(todoItem);
-            await dbContext.SaveChangesAsync();
+                await dbContext.AddAsync(todoItem);
+                await dbContext.SaveChangesAsync();
 
-            return CreatedAtAction("GetTodoItem", new { id = todoItem.TodoItemId }, todoItem);
+                return CreatedAtAction("GetTodoItem", new { id = todoItem.TodoItemId }, todoItem);
+            }
+            catch(Exception ex)
+            {
+               return BadRequest("Something went wrong. Error: " + ex.Message);
+            }
         }
 
         [HttpPost("{id}/rank")]
         public async Task<IActionResult> UpdateRank(int id, [FromBody] int newRank)
         {
-            var todoItem = dbContext.SingleTodoItem(id);
-            if (todoItem == null)
+            try
             {
-                return NotFound();
+                var todoItem = dbContext.SingleTodoItem(id);
+                if (todoItem == null)
+                {
+                    return NotFound();
+                }
+
+                todoItem.Rank = newRank;
+                await dbContext.SaveChangesAsync();
+
+                return Ok();
             }
-
-            todoItem.Rank = newRank;
-            await dbContext.SaveChangesAsync();
-
-            return Ok();
+            catch(Exception ex)
+            {
+                return BadRequest("Something went wrong. Error: " + ex.Message);
+            }
+            
         }
     }
 }

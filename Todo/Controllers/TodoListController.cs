@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
@@ -26,21 +27,35 @@ namespace Todo.Controllers
 
         public IActionResult Index()
         {
-            var userId = User.Id();
-            var todoLists = dbContext.RelevantTodoLists(userId);
-            var viewmodel = TodoListIndexViewmodelFactory.Create(todoLists);
-            return View(viewmodel);
+            try
+            {
+                var userId = User.Id();
+                var todoLists = dbContext.RelevantTodoLists(userId);
+                var viewmodel = TodoListIndexViewmodelFactory.Create(todoLists);
+                return View(viewmodel);
+            }
+            catch(Exception ex)
+            {
+                return BadRequest("Something went wrong. Error: " + ex.Message);
+            }
         }
 
         public IActionResult Detail(int todoListId, bool orderByRank = false)
         {
-            var todoList = dbContext.SingleTodoList(todoListId);
+            try
+            {
+                var todoList = dbContext.SingleTodoList(todoListId);
 
-            if (todoList != null && orderByRank)
-                todoList.Items = todoList.Items.OrderBy(ti => ti.Rank).ToList();
+                if (todoList != null && orderByRank)
+                    todoList.Items = todoList.Items.OrderBy(ti => ti.Rank).ToList();
 
-            var viewmodel = TodoListDetailViewmodelFactory.Create(todoList);
-            return View(viewmodel);
+                var viewmodel = TodoListDetailViewmodelFactory.Create(todoList);
+                return View(viewmodel);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest("Something went wrong. Error: " + ex.Message);
+            }
         }
 
         [HttpGet]
@@ -55,14 +70,21 @@ namespace Todo.Controllers
         {
             if (!ModelState.IsValid) { return View(fields); }
 
-            var currentUser = await userStore.FindByIdAsync(User.Id(), CancellationToken.None);
+            try
+            {
+                var currentUser = await userStore.FindByIdAsync(User.Id(), CancellationToken.None);
 
-            var todoList = new TodoList(currentUser, fields.Title);
+                var todoList = new TodoList(currentUser, fields.Title);
 
-            await dbContext.AddAsync(todoList);
-            await dbContext.SaveChangesAsync();
+                await dbContext.AddAsync(todoList);
+                await dbContext.SaveChangesAsync();
 
-            return RedirectToAction("Create", "TodoItem", new {todoList.TodoListId});
+                return RedirectToAction("Create", "TodoItem", new { todoList.TodoListId });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest("Something went wrong. Error: " + ex.Message);
+            }
         }
     }
 }

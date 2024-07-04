@@ -1,9 +1,10 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Todo.Data;
-using Todo.Data.Entities;
 using Todo.EntityModelMappers.TodoItems;
+using Todo.Interfaces;
 using Todo.Models.TodoItems;
 using Todo.Services;
 
@@ -12,19 +13,25 @@ namespace Todo.Controllers
     [Authorize]
     public class TodoItemController : Controller
     {
-        private readonly ApplicationDbContext dbContext;
+        private readonly ITodoItemService todoItemService;
 
-        public TodoItemController(ApplicationDbContext dbContext)
+        public TodoItemController(ApplicationDbContext dbContext, ITodoItemService todoItemService)
         {
-            this.dbContext = dbContext;
+            this.todoItemService = todoItemService;
         }
 
         [HttpGet]
         public IActionResult Edit(int todoItemId)
         {
-            var todoItem = dbContext.SingleTodoItem(todoItemId);
-            var fields = TodoItemEditFieldsFactory.Create(todoItem);
-            return View(fields);
+            try
+            {
+                var fields = todoItemService.GetTodoItemEditFields(todoItemId);
+                return View(fields);
+            }
+            catch(Exception ex)
+            {
+                return BadRequest("Something went wrong. Error: " + ex.Message);
+            }
         }
 
         [HttpPost]
@@ -32,15 +39,17 @@ namespace Todo.Controllers
         public async Task<IActionResult> Edit(TodoItemEditFields fields)
         {
             if (!ModelState.IsValid) { return View(fields); }
+            
+            try
+            {
+                var todoListId = await todoItemService.UpdateTodoItem(fields);
 
-            var todoItem = dbContext.SingleTodoItem(fields.TodoItemId);
-
-            TodoItemEditFieldsFactory.Update(fields, todoItem);
-
-            dbContext.Update(todoItem);
-            await dbContext.SaveChangesAsync();
-
-            return RedirectToListDetail(todoItem.TodoListId);
+                return RedirectToListDetail(todoListId);
+            }
+            catch(Exception ex)
+            {
+               return BadRequest("Something went wrong. Error: " + ex.Message);
+            }
         }
 
         private RedirectToActionResult RedirectToListDetail(int fieldsTodoListId)

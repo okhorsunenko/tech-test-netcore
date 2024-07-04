@@ -3,9 +3,17 @@
 ### General info
 Oleg Khorsunenko
 
-Implementation time: Totaly it takes about 3:30 to do all the tasks.
+Implementation time: Totaly it takes about 4 hours to do all the tasks.
+3:30 on main tasks and 30 minutes on refactoring, clean up, error handling.
 I have separated that done part of it on one day(3 July) and second bunch on the next day(4 July).
 
+After finish main tasks I decided to made a little refactor, add error handling and adding unit tests.
+Also, created `TodoItemService` which incapsulated logic for edit Todo Item.
+
+Couple of improvements which could be done later:
+- Services could be done for other controllers as well, like for `TodoListController`.
+- Better error handling, cover more issues and return specific error page with better view.
+- Adding loging to the project.
 
 Please find below my comments regarding task implementation
 
